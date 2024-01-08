@@ -1,0 +1,13 @@
+numpy
+
+scikit-learn
+
+python-tsp
+
+pandas
+
+django
+
+django-ckeditor
+
+django-import-export

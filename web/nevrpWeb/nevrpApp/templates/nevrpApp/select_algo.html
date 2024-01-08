@@ -1,0 +1,16 @@
+{% extends "nevrpApp/base.html" %}
+{% block content %}
+<form action="run_algo" method="post">
+    {% csrf_token %}
+    <p><strong>Chọn giải thuật</strong></p>
+    <input type="radio" name="algo" id="kmeans" value="kmeans"> KMeans<br>
+    <input type="radio" name="algo" id="hierarchical" value="hierarchical" checked> Hierarchical clustering<br>
+
+    <p><strong>Chọn tiêu chí ghép cụm</strong></p>
+    <input type="radio" name="linkage" id="complete" value="complete"> Complete<br>
+    <input type="radio" name="linkage" id="single" value="single"> Single<br>
+    <input type="radio" name="linkage" id="average" value="average"> Average<br>
+    <input type="radio" name="linkage" id="ward" value="ward"> Ward<br>
+    <button type="submit">Gửi</button>
+</form>
+{% endblock %}

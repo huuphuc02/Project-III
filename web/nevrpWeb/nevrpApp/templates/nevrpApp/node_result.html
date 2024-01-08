@@ -1,0 +1,35 @@
+{% extends "nevrpApp/base.html" %}
+{% block content %}
+{% if node_result %}
+	<h1>Search node code</h1>
+	<form method=POST action="{% url 'search-node' %}">
+        {% csrf_token %}
+        <input class="form-control mr-sm-2" type="search" placeholder="Search node code" aria-label="Search" name="code">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+
+{% elif res %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Code</th>
+      <th scope="col">Start node</th>
+      <th scope="col">End node</th> 
+      <th scope="col">Transit vehicle</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {% for n in res %}
+      <td>{{n.code}}</td>
+      <td>{{n.start_node}}</td>
+      <td>{{n.end_node}}</td>
+      <td>{{n.transit_vehicle}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<h1>No Data</h1>
+{% endif %}
+{% endblock %}

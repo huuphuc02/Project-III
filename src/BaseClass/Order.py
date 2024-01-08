@@ -1,0 +1,163 @@
+import copy
+class Order:
+    def __init__(
+        self,
+        created_at, 
+        updated_at, 
+        capacity, 
+        code, 
+        delivery_after_time, 
+        delivery_before_time, 
+        delivery_mode, 
+        order_value, 
+        time_service, 
+        time_loading, 
+        weight, 
+        customer_id, 
+        depot_id
+        ) -> None:
+        self.create_at = created_at
+        self.update_at = updated_at
+        self.capacity = capacity
+        self.code = str(code)
+        self.delivery_after_time = int(delivery_after_time)
+        self.delivery_before_time = int(delivery_before_time)
+        self.delivery_mode = delivery_mode 
+        self.order_value = order_value 
+        self.time_service = time_service 
+        self.time_loading = time_loading 
+        self.weight = weight 
+        self.customer_id = str(customer_id)
+        self.depot_id = str(depot_id)
+        self.state = [str(depot_id)]
+        self.transit_vehicle = []
+        self.phase_list = [] # Lưu thông tin các pha mà đơn cần đi (pha 1,2,3)
+
+    def to_array(self) -> []:
+        '''
+        Chuyển đổi Order object thành một mảng với thông tin bổ sung.
+        Bao gồm sender_2, sender_1, receiver_1, receiver_2, weight,
+        delivery_after_time, delivery_before_time, và delivery_mode.
+        '''
+        order_array = []
+        if 1 in self.phase_list:
+            order_array.append(self.state[0])
+            order_array.append(self.state[1])
+            order_array.append(self.state[2])
+        else:
+            order_array.append(-1)
+            order_array.append(self.state[0])
+            order_array.append(self.state[1])
+
+        if 3 in self.phase_list:
+            order_array.append(self.state[-1])
+        else:
+            order_array.append(-1)
+
+        order_array.append(self.weight)
+        order_array.append(self.delivery_after_time)
+        order_array.append(self.delivery_before_time)
+        order_array.append(self.delivery_mode)
+
+
+        return order_array
+    
+    def update_state(self, current_node_code: str, phase_number = None, vehicle_code=None) -> None:
+        # print('\tCập nhật trạng thái đơn hàng đã được chuyển tới node có code tương ứng')
+        self.state.append(current_node_code)
+        if phase_number is not None: self.phase_list.append(phase_number)
+        if vehicle_code is not None: self.transit_vehicle.append(vehicle_code)
+        return 
+    
+    def get_current_state(self) -> str:
+        '''
+        Lấy code của node hiện chứa đơn hàng
+        '''
+        # print('\tLấy code của node hiện đang chứa đơn hàng')
+        return self.state[-1]
+    
+    def get_path(self):
+        if len(self.state) >= 2:
+            return self.state[-2] + ' -> ' + self.state[-1]
+        else: return self.state[-1]
+    def get_start_code(self):
+        return self.depot_id
+    
+    def get_end_code(self):
+        return self.customer_id
+    
+    def get_code(self):
+        return self.code
+
+    def print(self) -> None:
+        for k, v in self.__dict__.items():
+            print(f"{k}: {v}")
+        return
+    
+    
+class OrderController:
+    def __init__(self, order_dict: dict[str, Order] = None) -> None:
+        if order_dict is not None: self.order_dict = order_dict
+        self.order_dict: dict[str, Order] = {}
+    
+    def add(self, order: Order) -> None:
+        # print('\tĐã thêm order vào danh sách')
+        self.order_dict[order.code] = order
+        return
+    
+    def remove(self, order: Order) -> None:
+        print('\tXóa order khỏi danh sách')
+        if order.code in self.order_dict.keys():
+            del self.order_dict[order.code]
+        return
+    
+    def get_order_dict(self) -> dict[str, Order]:
+        return self.order_dict
+    
+    def get_order_state(self) -> dict[str, str]:
+        # print('\tLấy thông tin về code của các node đang cầm các đơn hàng')
+        res = {}
+        for code, order in self.order_dict.items():
+            res[code] = order.get_current_state()
+        return res
+    
+    def get_order_path(self):
+        res = {}
+        for code, order in self.order_dict.items():
+            res[code] = order.get_path()
+        return res
+    
+    def get_order_code(self) -> list[str]:
+        return list(self.order_dict.keys())
+    
+    def length(self) -> int:
+        return len(list(self.order_dict.keys()))
+
+    def update_order_state(self, order_code: str, current_node_code: str, vehicle_code: str = None, remove_flag = False) -> None:
+        '''
+        Update state của order có code là order_code
+        '''
+        if order_code not in self.order_dict.keys(): return
+        # print(vehicle_code)
+        # input("122342314")
+        self.order_dict[order_code].update_state(current_node_code, vehicle_code)
+        if remove_flag: self.order_dict[order_code].state.pop(0)
+        return
+    
+    def get_order(self, order_code) -> Order:
+        return self.order_dict[order_code]
+    
+    def print(self):
+        for order in list(self.order_dict.values()):
+            print(order.get_current_state())
+    def copy(self): 
+        res = OrderController()
+        for code in self.order_dict:
+            res.add(copy.deepcopy(self.order_dict[code]))
+        return res
+    
+    def __add__(self, order_controller):
+        for order in list(order_controller.get_order_dict().values()):
+            self.add(order)
+        return 
+    
